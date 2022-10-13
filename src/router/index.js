@@ -20,6 +20,7 @@ import register from "@/views/home/register"
 import settlement from "@/views/goods/settlement";
 import chooseAddress from "@/views/address/chooseAddress";
 import myCollection from "@/views/home/myCollection";
+import orderState from "@/views/goods/orderState";
 
 
 Vue.use(VueRouter)
@@ -99,6 +100,16 @@ const routes = [
                 components: {
                     default: scoreGoods,
                     down: down
+                }
+            },
+            {
+                path: 'orderState/:state',
+                components: {
+                    default: orderState,
+                    down: down
+                },
+                props: {
+                    default: true
                 }
             }
             ,]

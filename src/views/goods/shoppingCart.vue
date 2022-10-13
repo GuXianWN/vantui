@@ -30,7 +30,7 @@
             </template>
             <template #num style="font-size: 50px">
               <!--            数量步进器-->
-              <van-stepper @change="changeNumber(com.amount,com.id,com.sku.id)" v-model="com.amount"
+              <van-stepper @change="changeNumber(com)" v-model="com.amount"
                            disable-input/>
             </template>
 
@@ -78,7 +78,8 @@
 </template>
 
 <script>
-import { Toast } from 'vant';
+import {Toast} from 'vant';
+
 export default {
   name: "shoppingCart",
   data() {
@@ -194,10 +195,11 @@ export default {
       })
     },
     //修改商品数量
-    changeNumber(amount, id, skuId) {
-      this.putRequst('/shoppingCart/' + id, {
-        amount: amount,
-        skuId: skuId
+    changeNumber(com) {
+      this.putRequst('/shoppingCart/' + com.id, {
+        amount: com.amount,
+        skuId: com.sku.id,
+        productId: com.product.id
       }).then(resp => {
       })
       this.computePrice()

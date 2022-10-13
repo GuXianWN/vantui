@@ -64,7 +64,7 @@
         :goods-id="0">
       <template #sku-actions="props">
         <div class="van-sku-actions">
-          <van-button square size="large" type="warning" @click="console.log('保存')">
+          <van-button square size="large" type="warning" @click="addToShoppingCart">
             加入购物车
           </van-button>
           <van-button square size="large" type="warning" @click="console.log('保存')">
@@ -77,16 +77,18 @@
 
     <!--    底下的导航栏-->
     <van-goods-action>
-      <van-goods-action-icon icon="cart-o" text="购物车"/>
+      <van-goods-action-icon icon="cart-o" text="购物车" @click="$router.push('/navigation/shoppingCart')"/>
       <van-goods-action-icon icon="star" text="收藏" color="#ff5000" v-show="collectState" @click="toCollect"/>
       <van-goods-action-icon icon="star-o" text="收藏" color="#ff5000" v-show="!collectState" @click="toCollect"/>
-      <van-goods-action-button type="warning" text="加入购物车"/>
+      <van-goods-action-button type="warning" text="加入购物车" @click="addToShoppingCart"/>
       <van-goods-action-button type="danger" text="立即购买"/>
     </van-goods-action>
   </div>
 </template>
 
 <script>
+import {Notify} from "vant";
+
 export default {
   name: "goodsDetailed",
   props: {
@@ -154,18 +156,33 @@ export default {
     toCollect() {
       this.collectState = !this.collectState
       if (this.collectState) {
-        this.postRequst('/like/add', {mid: this.id}).then(resp => {
+        this.postRequst('/favourites/?productId=' + this.id).then(resp => {
 
         })
       } else {
-        this.deleteRequst('/like', {mid: this.id}).then(resp => {
+        this.deleteRequst('/favourites/' + this.id).then(resp => {
 
         })
       }
     },
+    addToShoppingCart() {
+      let data = this.$refs.sku.getSkuData();
+      console.log(data)
+      if (data.selectedSkuComb != null) {
+        this.postRequst('shoppingCart', {
+          skuId: data.selectedSkuComb.id,
+          amount: data.selectedNum,
+          productId: this.goods.mid
+        }).then(resp => {
+          this.show=false
+        })
+      } else {
+        Notify({type: 'danger', message: '请选择商品规格'});
+      }
+    },
     initCollectState() {
-      this.getRequst('/like/' + this.id).then(resp => {
-        this.collectState = resp.id != null;
+      this.getRequst('/favourites/?productId=' + this.id).then(resp => {
+        this.collectState = resp == null;
       })
     },
     onChange(index) {

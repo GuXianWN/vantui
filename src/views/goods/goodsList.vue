@@ -138,6 +138,7 @@ export default {
   },
   mounted() {
     this.initGoodsList()
+    console.log(this.words)
     if (this.words != null) {
       this.placeholder = this.words
     }

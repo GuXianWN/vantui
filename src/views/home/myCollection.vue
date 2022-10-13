@@ -15,10 +15,10 @@
     </van-nav-bar>
 
     <van-grid :column-num="2" :border="false">
-      <van-grid-item v-for="good in goodsList" :key="good.mid">
+      <van-grid-item v-for="good in goodsList" :key="good.id">
         <van-checkbox v-model="good.checked" style="margin-left: auto;margin-bottom: 10px"
                       v-show="start" @click="childChecked"></van-checkbox>
-        <van-image :src="good.singleUrl" style="border-radius: 10px">
+        <van-image :src="good.product.singleUrl" style="border-radius: 10px">
           <template v-slot:loading>
             <van-loading type="spinner" size="20"/>
           </template>
@@ -27,12 +27,12 @@
           <p
               style="font-weight: bold;font-size: 12px;overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
             <van-tag type="danger" size="small">天猫</van-tag>
-            {{ good.name }}
+            {{ good.product.name }}
           </p>
           <span style=" color: red; font-size: 12px;">¥</span>
           <span style="color: red">{{ good.left }}</span>
           <span style=" color: red; font-size: 12px;">.{{ good.right }}</span>
-          <span style="color:rgb(153,153,153);font-size: 11px;">&nbsp{{ good.salesNum }}人已付款</span>
+          <span style="color:rgb(153,153,153);font-size: 11px;">&nbsp{{ good.product.salesNum }}人已付款</span>
         </div>
       </van-grid-item>
     </van-grid>
@@ -76,18 +76,19 @@ export default {
     removeCheck() {
       let list = []
       this.goodsList.forEach(goods => {
-        goods.checked ? list.push(goods.mid) : false;
+        goods.checked ? list.push(goods.id) : false;
       })
       console.log(list)
-      this.deleteRequst('/like/batch',list)
+      this.deleteRequst('/favourites',list)
       this.initCollection()
     },
     //初始化收藏列表
     initCollection() {
-      this.getRequst('/like').then(resp => {
+      this.getRequst('/favourites').then(resp => {
         resp.forEach(goods => {
           goods.checked = false
-          goods.price *= 100;
+          goods.price=goods.product.price * 100;
+          console.log(goods.price)
           goods.left = parseInt(goods.price / 100)
           goods.right = goods.price - goods.left * 100
           if (goods.right == 0) {

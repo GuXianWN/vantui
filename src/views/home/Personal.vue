@@ -67,23 +67,23 @@
           <van-row
               style="text-align: center; margin-top: 15px; margin-bottom: 15px;font-size: 12px"
           >
-            <van-col span="5" style="display: flex; flex-direction: column">
+            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/1')">
               <van-icon name="shop-o" size="25px"/>
               <span>未支付</span>
             </van-col>
-            <van-col span="5" style="display: flex; flex-direction: column">
+            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/2')">
               <van-icon name="shop-collect-o" size="25px"/>
               <span>待发货</span>
             </van-col>
-            <van-col span="5" style="display: flex; flex-direction: column">
+            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/3')">
               <van-icon name="logistics" size="25px"/>
               <span>待收货</span>
             </van-col>
-            <van-col span="5" style="display: flex; flex-direction: column">
+            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/4')">
               <van-icon name="cart-o" size="25px"/>
               <span>待评价</span>
             </van-col>
-            <van-col span="4" style="display: flex; flex-direction: column">
+            <van-col span="4" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/5')">
               <van-icon name="cart-o" size="25px"/>
               <span>已完成</span>
             </van-col>
