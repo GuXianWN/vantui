@@ -14,7 +14,7 @@
 
     <!--    轮播图-->
     <van-swipe @change="onChange">
-      <van-swipe-item v-for="(image, index) in goods.url" :key="index">
+      <van-swipe-item v-for="(image, index) in goods.carousel" :key="index">
         <img :src="image" width="100%" style="display: block"/>
       </van-swipe-item>
       <template #indicator>
@@ -33,8 +33,8 @@
         <div style="margin-left: auto">
           <table style="color: rgb(203,203,203);text-align: center;font-size: 10px;margin-top: 3px;margin-right: 5px">
             <tr>
-              <td>{{ goods.browseNum }}</td>
-              <td>{{ goods.salesNum }}</td>
+              <td>{{ goods.visitedTimes }}</td>
+              <td>{{ goods.soldCount }}</td>
             </tr>
             <tr>
               <td>浏览</td>
@@ -44,7 +44,7 @@
         </div>
       </div>
       <div style="margin:15px;padding-bottom: 20px;font-weight: 600;">
-        {{ goods.name }}
+        {{ goods.title }}
       </div>
     </div>
 
@@ -67,7 +67,7 @@
           <van-button square size="large" type="warning" @click="addToShoppingCart">
             加入购物车
           </van-button>
-          <van-button square size="large" type="warning" @click="console.log('保存')">
+          <van-button square size="large" type="warning" @click="placeOrder">
             立即购买
           </van-button>
         </div>
@@ -81,7 +81,7 @@
       <van-goods-action-icon icon="star" text="收藏" color="#ff5000" v-show="collectState" @click="toCollect"/>
       <van-goods-action-icon icon="star-o" text="收藏" color="#ff5000" v-show="!collectState" @click="toCollect"/>
       <van-goods-action-button type="warning" text="加入购物车" @click="addToShoppingCart"/>
-      <van-goods-action-button type="danger" text="立即购买"/>
+      <van-goods-action-button type="danger" text="立即购买" @click="show=true"/>
     </van-goods-action>
   </div>
 </template>
@@ -92,7 +92,8 @@ import {Notify} from "vant";
 export default {
   name: "goodsDetailed",
   props: {
-    id: String
+    id: String,
+    mode: String
   },
   data() {
     return {
@@ -112,15 +113,19 @@ export default {
     //初始化
     initGoods() {
       this.getRequst('/products/' + this.id).then(resp => {
-        this.goods = resp
-        this.image.picture = resp.url[0]
-        let a = []
-        a = resp.price.toString().split('.')
-        this.goods.left = a[0]
-        this.goods.right = a[1]
+        let good = resp
+        this.image.picture = resp.carousel[0]
+
+        good.price *= 100;
+        good.left = parseInt(good.price / 100)
+        good.right = good.price - good.left * 100
+        if (good.right == 0) {
+          good.right = '00'
+        }
+        this.goods = good
 
         const sku = {
-          price: resp.price, // 默认价格（单位元）
+          price: good.left + '.' + good.right, // 默认价格（单位元）
           collection_id: 2261,
         }
 
@@ -130,6 +135,7 @@ export default {
         })
         sku.stock_num = nums
 
+        console.log(this.goods)
         sku.tree = Object.entries(this.goods.sku).map(([k, v], idx) => ({
           k: k,
           k_s: `id${idx}`,
@@ -151,6 +157,11 @@ export default {
           return newVar
         })
         this.sku = sku
+
+        if (this.mode==1){
+          console.log("足迹+1")
+          this.postRequst(`/footprints/`,{productId: this.goods.id})
+        }
       })
     },
     toCollect() {
@@ -172,9 +183,9 @@ export default {
         this.postRequst('shoppingCart', {
           skuId: data.selectedSkuComb.id,
           amount: data.selectedNum,
-          productId: this.goods.mid
+          productId: this.goods.id
         }).then(resp => {
-          this.show=false
+          this.show = false
         })
       } else {
         Notify({type: 'danger', message: '请选择商品规格'});
@@ -186,10 +197,23 @@ export default {
       })
     },
     onChange(index) {
-      this.indicator = index + 1 + '/' + this.goods.url.length
+      this.indicator = index + 1 + '/' + this.goods.carousel.length
     },
+    placeOrder(){
+      let data = this.$refs.sku.getSkuData();
+      if (data.selectedSkuComb == null) {
+        Notify({type: 'danger', message: '请选择商品规格'});
+      }else {
+        let a=[{
+          skuId:data.selectedSkuComb.id,
+          amount:data.selectedNum
+        }]
+        this.$router.push(`/settlement/${JSON.stringify(a)}`)
+      }
+    }
   },
   mounted() {
+    console.log(this.mode)
     this.initGoods()
     this.initCollectState()
   }

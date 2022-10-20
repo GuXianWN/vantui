@@ -15,17 +15,17 @@
           </van-checkbox>
           <!--        信息-->
           <van-card :num=com.amount :price=com.sku.price :thumb=com.sku.image
-                    style="margin: 0 10px;width: 100%;" @click-thumb="clickThumb(com.product.mid)">
+                    style="margin: 0 10px;width: 100%;" @click-thumb="clickThumb(com.product.id)">
             <template #title>
               <div
                   style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
-                {{ com.product.name }}
+                {{ com.product.title }}
               </div>
             </template>
             <template #desc>
               <div
                   style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
-                {{ com.product.describe }}
+                {{ com.product.description }}
               </div>
             </template>
             <template #num style="font-size: 50px">
@@ -86,6 +86,7 @@ export default {
     return {
       tradeStatus: false,
       id: 0,
+      cartId: 0,
       loading: false,
       goods: {
         // 默认商品 sku 缩略图
@@ -106,14 +107,15 @@ export default {
       })
     },
     clickThumb(id) {
-      this.$router.push('/goodsDetailed/' + id)
+      this.$router.push(`/goodsDetailed/ ${id}/1`)
     },
     //修改规格后保存
     saveSku() {
       this.loading = true;
       this.show = false
       let sku = this.$refs.sku.getSkuData()
-      this.putRequst('/shoppingCart/' + this.id, {
+      this.putRequst('/shoppingCart/' + this.cartId, {
+        productId: this.id,
         amount: sku.selectedNum,
         skuId: sku.selectedSkuComb.id
       }).then(resp => {
@@ -123,7 +125,9 @@ export default {
     },
     //初始化商品规格列表里的信息
     toShow(com) {
-      this.id = com.id
+      this.id = com.product.id
+      this.cartId = com.id
+      console.log(`初始化sku${com.product.id}`)
 
       const initialSku = {}
       initialSku.selectedNum = com.amount
@@ -147,7 +151,7 @@ export default {
           previewImgUrl: item.image,
         }))
       }));
-      sku.list = com.product.skuDetains.map(v => {
+      sku.list = com.product.skuDetails.map(v => {
         let newVar = {
           id: v.id,
           price: v.price * 100,

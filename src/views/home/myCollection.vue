@@ -18,7 +18,7 @@
       <van-grid-item v-for="good in goodsList" :key="good.id">
         <van-checkbox v-model="good.checked" style="margin-left: auto;margin-bottom: 10px"
                       v-show="start" @click="childChecked"></van-checkbox>
-        <van-image :src="good.product.singleUrl" style="border-radius: 10px">
+        <van-image :src="good.product.carousel[0]" style="border-radius: 10px" @click="$router.push(`/goodsDetailed/${good.product.id}`)">
           <template v-slot:loading>
             <van-loading type="spinner" size="20"/>
           </template>
@@ -27,12 +27,12 @@
           <p
               style="font-weight: bold;font-size: 12px;overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
             <van-tag type="danger" size="small">天猫</van-tag>
-            {{ good.product.name }}
+            {{ good.product.title }}
           </p>
           <span style=" color: red; font-size: 12px;">¥</span>
           <span style="color: red">{{ good.left }}</span>
           <span style=" color: red; font-size: 12px;">.{{ good.right }}</span>
-          <span style="color:rgb(153,153,153);font-size: 11px;">&nbsp{{ good.product.salesNum }}人已付款</span>
+          <span style="color:rgb(153,153,153);font-size: 11px;">&nbsp{{ good.product.soldCount }}人已付款</span>
         </div>
       </van-grid-item>
     </van-grid>
@@ -79,15 +79,16 @@ export default {
         goods.checked ? list.push(goods.id) : false;
       })
       console.log(list)
-      this.deleteRequst('/favourites',list)
-      this.initCollection()
+      this.deleteRequst('/favourites', list).then(resp => {
+        this.initCollection()
+      })
     },
     //初始化收藏列表
     initCollection() {
       this.getRequst('/favourites').then(resp => {
         resp.forEach(goods => {
           goods.checked = false
-          goods.price=goods.product.price * 100;
+          goods.price = goods.product.price * 100;
           console.log(goods.price)
           goods.left = parseInt(goods.price / 100)
           goods.right = goods.price - goods.left * 100

@@ -3,8 +3,8 @@ import axios from "axios";
 const localhost = axios.create({
     timeout: 5000,
     // baseURL: 'http://101.34.229.217:8081/',
-    baseURL: 'https://just-passport-bacterial-poker.trycloudflare.com/',
-    // baseURL: 'http://192.168.1.103:8082/',
+    // baseURL: 'https://yang-selections-morocco-lot.trycloudflare.com/',
+    baseURL: 'http://192.168.1.103:8082/',
     disableHostCheck: true,
 })
 

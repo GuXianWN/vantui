@@ -67,25 +67,32 @@
           <van-row
               style="text-align: center; margin-top: 15px; margin-bottom: 15px;font-size: 12px"
           >
-            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/1')">
-              <van-icon name="shop-o" size="25px"/>
+
+
+            <van-col span="5" class="order-icon"
+                     @click="$router.push('/navigation/orderState/1')">
+              <van-icon name="shop-o" size="25px" :badge="orderCount.UNPAID"/>
               <span>未支付</span>
             </van-col>
-            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/2')">
-              <van-icon name="shop-collect-o" size="25px"/>
+            <van-col span="5" class="order-icon"
+                     @click="$router.push('/navigation/orderState/2')">
+              <van-icon name="shop-collect-o" size="25px" :badge="orderCount.PAID"/>
               <span>待发货</span>
             </van-col>
-            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/3')">
-              <van-icon name="logistics" size="25px"/>
+            <van-col span="5" class="order-icon"
+                     @click="$router.push('/navigation/orderState/3')">
+              <van-icon name="logistics" size="25px" :badge="orderCount.DELIVERED"/>
               <span>待收货</span>
             </van-col>
-            <van-col span="5" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/4')">
-              <van-icon name="cart-o" size="25px"/>
+            <van-col span="5" class="order-icon"
+                     @click="$router.push('/navigation/orderState/4')">
+              <van-icon name="cart-o" size="25px" :badge="orderCount.RECEIVED"/>
               <span>待评价</span>
             </van-col>
-            <van-col span="4" style="display: flex; flex-direction: column" @click="$router.push('/navigation/orderState/5')">
+            <van-col span="4" class="order-icon"
+                     @click="$router.push('/navigation/orderState/5')">
               <van-icon name="cart-o" size="25px"/>
-              <span>已完成</span>
+              <span>完成</span>
             </van-col>
           </van-row>
         </van-cell-group>
@@ -123,7 +130,7 @@
             </template>
           </van-cell>
 
-          <van-cell is-link @click="myPurse">
+          <van-cell is-link @click="$router.push('/footprint')">
             <!-- 使用 title 插槽来自定义标题 -->
             <template #title>
               <div style="display: flex; align-items: center">
@@ -163,9 +170,16 @@ export default {
         imageUrl:
             "https://guxianimg-1307121012.cos.ap-shanghai.myqcloud.com/md/QQ图片20211221210034.jpg",
       },
+      orderCount: {}
     };
   },
   methods: {
+    initOrderCount() {
+      this.getRequst('/orders/count').then(resp => {
+        this.orderCount = resp
+        console.log(resp);
+      })
+    },
     initAdmin() {
       if (window.localStorage.getItem("token")) {
         this.getRequst("/users/me").then((resp) => {
@@ -189,6 +203,7 @@ export default {
   },
   mounted() {
     this.initAdmin();
+    this.initOrderCount();
     window.sessionStorage.setItem("homePage", 4);
   },
 };
@@ -199,5 +214,10 @@ export default {
   background: white;
   border-radius: 15px;
   width: 100%;
+}
+.order-icon{
+  display: flex;
+  flex-direction: column;
+  padding: 0 14px;
 }
 </style>

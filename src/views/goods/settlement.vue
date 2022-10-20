@@ -44,18 +44,18 @@
         style="background: rgb(250,250,250);margin: 5px 10px 10px 10px;border-radius: 10px;display: flex;flex-direction: column;"
         v-for="com in commodity" :key="com.id">
       <!--        信息-->
-      <van-card :num=com.amount :price=com.sku.price :thumb=com.sku.image
+      <van-card :num="com.amount" :price="com.selectedSku.price" :thumb="com.selectedSku.image"
                 style="width: 100%;border-radius: 10px;">
         <template #title>
           <div
               style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
-            {{ com.product.name }}
+            {{ com.product.title }}
           </div>
         </template>
         <template #desc>
           <div
               style="overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
-            {{ com.product.describe }}
+            {{ com.product.description }}
           </div>
         </template>
         <template #num style="font-size: 50px">
@@ -65,7 +65,7 @@
         <template #tags>
           <div
               style="background: rgb(249,249,249);color: rgb(152,152,152);overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
-            {{ com.sku.title }}
+            {{ com.selectedSku.title }}
             <van-icon name="arrow-down"/>
           </div>
         </template>
@@ -89,9 +89,9 @@
     </div>
 
     <!--    底下-->
-    <van-submit-bar :price="price" button-text="提交订单" @submit="onSubmit"/>
+    <van-submit-bar :loading="loading" :price="price*100" button-text="提交订单" @submit="onSubmit"/>
     <!-- 备注编辑 -->
-    <van-popup v-model="Noteshow" round position="bottom" closeable :style="{ height: '70%' }">
+    <van-popup v-model="Noteshow" round position="bottom" closeable :style="{ height: '80%' }">
       <center>
         <h3>订单备注</h3>
         <van-field v-model="note" rows="7" autosize type="textarea" maxlength="200" placeholder="请输入留言"
@@ -107,10 +107,16 @@
 </template>
 
 <script>
+import {Notify} from "vant";
+
 export default {
   name: "settlement",
+  props: {
+    infor: String
+  },
   data() {
     return {
+      loading:false,
       id: 0,
       note: '',
       Noteshow: false,
@@ -135,7 +141,16 @@ export default {
       this.note = com.note
     },
     onSubmit() {
-      this.postRequst('/shopping-cart/buy')
+      this.loading=true;
+      this.postRequst('/sku/buy',this.pay).then(resp=>{
+        if (resp.ok){
+          Notify({type: 'success', message: resp.msg});
+          this.$router.push('/navigation/orderState/2')
+        }else {
+          Notify({type: 'danger', message: resp.msg});
+          this.loading=false;
+        }
+      })
     },
     initAdminAddress() {
       let id = window.sessionStorage.getItem('address');
@@ -157,21 +172,14 @@ export default {
     },
     //初始化
     initTotalPrice() {
-      this.getRequst('/shoppingCart').then(resp => {
-        resp.forEach(com => {
-          this.pay.forEach(p => {
-            if (com.id == p) {
-              com.note = ''
-              this.commodity.push(com)
-              this.price += com.sku.price * com.amount * 100
-            }
-          })
-        })
+      this.postRequst('/sku/calc',this.pay).then(resp=>{
+        this.price=resp.price
+        this.commodity=resp.items
       })
     },
   },
   mounted() {
-    this.pay = JSON.parse(window.sessionStorage.getItem('pay'))
+    this.pay = JSON.parse(this.infor)
     this.initAdminAddress()
     this.initTotalPrice()
   }

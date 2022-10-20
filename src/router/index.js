@@ -21,6 +21,7 @@ import settlement from "@/views/goods/settlement";
 import chooseAddress from "@/views/address/chooseAddress";
 import myCollection from "@/views/home/myCollection";
 import orderState from "@/views/goods/orderState";
+import footprint from "@/views/home/footprint";
 
 
 Vue.use(VueRouter)
@@ -157,7 +158,7 @@ const routes = [
         }
     },
     {
-        path: '/goodsDetailed/:id',
+        path: '/goodsDetailed/:id/:mode',
         component: goodsDetailed,
         props: true
     },
@@ -170,8 +171,9 @@ const routes = [
         component: register
     },
     {
-        path: '/settlement',
-        component: settlement
+        path: '/settlement/:infor',
+        component: settlement,
+        props: true
     },
     {
         path: '/chooseAddress',
@@ -179,6 +181,9 @@ const routes = [
     }, {
         path: '/myCollection',
         component: myCollection
+    }, {
+        path: '/footprint',
+        component: footprint
     }
 ]
 

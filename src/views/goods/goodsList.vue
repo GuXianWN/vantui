@@ -22,7 +22,7 @@
 
     <van-grid :column-num="2" :border="false">
       <van-grid-item v-for="good in goodsList" :key="good.mid">
-        <van-image :src="good.singleUrl" style="border-radius: 10px" @click="$router.push('/goodsDetailed/'+good.mid)">
+        <van-image :src="good.carousel[0]" style="border-radius: 10px" @click="$router.push(`/goodsDetailed/${good.id}/1`)">
           <template v-slot:loading>
             <van-loading type="spinner" size="20"/>
           </template>
@@ -31,12 +31,12 @@
           <p
               style="font-weight: bold;font-size: 12px;overflow: hidden;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;">
             <van-tag type="danger" size="small">天猫</van-tag>
-            {{ good.name }}
+            {{ good.title }}
           </p>
           <span style=" color: red; font-size: 12px;">¥</span>
           <span style="color: red">{{ good.left }}</span>
           <span style=" color: red; font-size: 12px;">.{{ good.right }}</span>
-          <span style="color:rgb(153,153,153);font-size: 11px;">&nbsp{{ good.salesNum }}人已付款</span>
+          <span style="color:rgb(153,153,153);font-size: 11px;">&nbsp{{ good.soldCount }}人已付款</span>
         </div>
       </van-grid-item>
       <van-button style="text-align: center;;width: 100vw" @click="loadingGoods">
@@ -57,7 +57,7 @@ export default {
     return {
       placeholder: "请输入搜索关键词",
       goodsList: [],
-      page: 0,
+      page: 1,
       full: false,
       screening1: 0,
       screening2: 0,
@@ -85,31 +85,34 @@ export default {
     loadingGoods() {
       this.page += 1
 
-      let page = {
-        page: this.page,
-        num: 10,
-        sortType: this.screening1 ? 3 : this.screening2,
-      }
-      if (this.words != null) {
-        page.words = this.words
-      }
+      if (!this.full){
+        let page = {
+          page: this.page,
+          num: 10,
+          sortType: this.screening1 ? 3 : this.screening2,
+        }
+        if (this.words != null) {
+          page.words = this.words
+        }
 
-      this.getRequst('/products/price', page).then(resp => {
-        this.full = resp.length === 0
+        this.getRequst('/products', page).then(resp => {
+          this.full = resp.length === 0
 
-        resp.forEach(goods => {
-          goods.price *= 100;
-          goods.left = parseInt(goods.price / 100)
-          goods.right = goods.price - goods.left * 100
-          if (goods.right == 0) {
-            goods.right = '00'
-          }
+          resp.forEach(goods => {
+            goods.price *= 100;
+            goods.left = parseInt(goods.price / 100)
+            goods.right = goods.price - goods.left * 100
+            if (goods.right == 0) {
+              goods.right = '00'
+            }
+          })
+          resp.forEach(goods => {
+            this.goodsList.push(goods)
+          })
         })
-        resp.forEach(goods => {
-          this.goodsList.push(goods)
-        })
-      })
-      this.loading = false;
+        this.loading = false;
+
+      }
     },
     initGoodsList() {
       this.goodsList = []
@@ -123,7 +126,7 @@ export default {
         page.words = this.words
       }
 
-      this.getRequst('/products/price', page).then(resp => {
+      this.getRequst('/products', page).then(resp => {
         resp.forEach(goods => {
           goods.price *= 100;
           goods.left = parseInt(goods.price / 100)
@@ -132,6 +135,10 @@ export default {
             goods.right = '00'
           }
         })
+
+        if (resp.length<10){
+          this.full=true
+        }
         this.goodsList = resp
       })
     }
